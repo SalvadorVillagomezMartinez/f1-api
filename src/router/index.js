@@ -1,6 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import authRouter  from '../modules/auth/router'
+import ExitsRouter  from '../modules/Exits/router'
+import ArticlesRouter  from '../modules/Articles/router'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -13,11 +17,38 @@ const routes = [
   {
     path: '/about',
     name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+  },
+  {
+    path: '/auth',
+    ...authRouter
+
+
+  },
+  {
+    path: '/exits',
+      beforeEnter: async (to, from, next) => {
+        const { ok } = await store.dispatch('auth/checkAuthentication')
+        if ( ok ) next()
+        else next({ name: 'login' })
+    },
+    ...ExitsRouter
+
+
+  },
+  {
+    path: '/articles',
+   
+      beforeEnter: async (to, from, next) => {
+        const { ok } = await store.dispatch('auth/checkAuthentication')
+        if ( ok ) next()
+        else next({ name: 'login' })
+    },
+    ...ArticlesRouter
+
+
+  },
+
 ]
 
 const router = new VueRouter({
